@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPGMA Phylogenetic Tree &amp; Metrics Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --n-0:#ffffff;
+  --n-25:#fbfcfe;
+  --n-50:#f6f8fb;
+  --n-100:#eef2f7;
+  --n-150:#e4eaf2;
+  --n-200:#d6dde8;
+  --n-300:#b8c2d3;
+  --n-400:#8f9bb0;
+  --n-500:#667085;
+  --n-600:#4a5568;
+  --n-700:#344054;
+  --n-800:#1f2a3d;
+  --n-900:#0f1e3d;
+
+  --primary:#1d4ed8;
+  --primary-hover:#1e40af;
+  --primary-soft:#eef3ff;
+  --primary-border:#c8d6fb;
+  --accent:#0e7490;
+
+  --success:#047857;
+  --success-soft:#ecfdf5;
+  --success-border:#a7f3d0;
+  --warning:#b45309;
+  --warning-soft:#fffbeb;
+  --warning-border:#fde68a;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
+  --danger-border:#fecaca;
+
+  --bg:#f4f6fa;
+  --panel:#ffffff;
+  --panel-subtle:#fafbfd;
+
+  --line:#e2e8f0;
+  --line-strong:#cbd5e1;
+
+  --ink:#0f172a;
+  --ink-2:#334155;
+  --ink-3:#64748b;
+  --ink-4:#94a3b8;
+
+  --radius-sm:6px;
+  --radius:10px;
+  --radius-lg:14px;
+  --radius-xl:18px;
+  --shadow-xs:0 1px 2px rgba(15,23,42,.04);
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+  --shadow:0 4px 12px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.04);
+  --shadow-md:0 10px 24px rgba(15,23,42,.08), 0 2px 6px rgba(15,23,42,.04);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  font-size:14.5px;
+  line-height:1.55;
+  color:var(--ink);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:transparent}
+.container{max-width:1420px;margin:0 auto;padding:0 24px}
+code,kbd,samp,pre,.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* ============== HERO ============== */
+.hero{
+  background:
+    linear-gradient(180deg,#0b1c3d 0%,#102a56 55%,#122d5c 100%);
+  color:#fff;
+  padding:64px 0 56px;
+  position:relative;
+  overflow:hidden;
+  border-bottom:1px solid #0a1730;
+}
+.hero:before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:52px 52px;
+  pointer-events:none;
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  right:-140px;top:-160px;width:520px;height:520px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,.22),rgba(59,130,246,0) 62%);
+  pointer-events:none;
+}
+.hero .container{position:relative;z-index:1}
+.hero .tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:#c7d5f0;
+}
+.hero .tag:before{
+  content:"";width:6px;height:6px;border-radius:50%;
+  background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.2);
+}
+.hero h1{
+  font-size:clamp(1.9rem,3.4vw,2.85rem);
+  line-height:1.12;
+  letter-spacing:-.022em;
+  margin:20px 0 16px;
+  max-width:920px;
+  font-weight:700;
+  color:#fff;
+}
+.hero h1 em{
+  font-style:normal;
+  color:#93c5fd;
+  font-weight:600;
+}
+.hero p{
+  font-size:1.02rem;
+  max-width:760px;
+  color:#b8c8e3;
+  margin:0 0 30px;
+  line-height:1.65;
+}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+
+.features{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin-top:48px;
+}
+.feature{
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:20px 22px;
+  transition:border-color .18s,background .18s,transform .18s;
+}
+.feature:hover{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(147,197,253,.28);
+  transform:translateY(-1px);
+}
+.feature .label{
+  font-size:11px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#93c5fd;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.feature .label:before{
+  content:"";width:18px;height:2px;background:#3b82f6;border-radius:2px;
+}
+.feature b{
+  display:block;font-size:.98rem;font-weight:600;
+  margin-bottom:6px;color:#fff;
+}
+.feature span{font-size:.88rem;color:#9aabc8;line-height:1.5}
+
+/* ============== NAV ============== */
+.nav{
+  position:sticky;top:0;z-index:30;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:saturate(180%) blur(12px);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{
+  display:flex;gap:2px;overflow-x:auto;
+  padding:10px 0;scrollbar-width:none;
+}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav a{
+  color:var(--ink-2);text-decoration:none;
+  padding:7px 12px;border-radius:8px;
+  white-space:nowrap;font-weight:500;font-size:13px;
+  transition:background .15s,color .15s;
+  letter-spacing:-.005em;
+}
+.nav a:hover{background:var(--n-100);color:var(--primary)}
+
+/* ============== SECTIONS ============== */
+.section{padding:48px 0}
+.section + .section{padding-top:8px}
+.section h2{
+  font-size:1.4rem;margin:0 0 8px;
+  font-weight:700;letter-spacing:-.018em;
+  color:var(--ink);
+  display:flex;align-items:baseline;gap:14px;
+}
+.section h2 .num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;flex-shrink:0;
+  border-radius:7px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:600;
+  background:var(--n-100);color:var(--ink-3);
+  border:1px solid var(--line);
+  transform:translateY(2px);
+}
+.section .lead{
+  margin:0 0 26px;color:var(--ink-3);
+  max-width:880px;font-size:.95rem;line-height:1.6;
+}
+
+/* ============== LAYOUT ============== */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);
+  padding:22px;
+  position:relative;
+}
+.card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:16px;flex-wrap:wrap;
+}
+.card-head h3{
+  margin:0;font-size:.98rem;font-weight:600;
+  letter-spacing:-.01em;color:var(--ink);
+}
+.card-head .subtitle{
+  font-size:12px;color:var(--ink-3);
+}
+.col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-7{grid-column:span 7}
+.col-6{grid-column:span 6}.col-5{grid-column:span 5}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+
+/* ============== BUTTONS ============== */
+.btn{
+  padding:8px 14px;border-radius:8px;
+  font-weight:500;font-size:13px;
+  display:inline-flex;align-items:center;gap:7px;
+  white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
+  border:1px solid transparent;
+  letter-spacing:-.005em;
+}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{
+  background:#fff;color:#0b1c3d;font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,.15);
+}
+.btn-primary:hover{background:#f2f5fb}
+.btn-blue{
+  background:var(--primary);color:#fff;font-weight:600;
+  box-shadow:0 1px 2px rgba(29,78,216,.2);
+}
+.btn-blue:hover{background:var(--primary-hover)}
+.btn-soft{
+  background:var(--n-0);color:var(--ink-2);
+  border-color:var(--line-strong);
+}
+.btn-soft:hover{background:var(--n-50);border-color:var(--n-300)}
+.btn-danger{
+  background:var(--n-0);color:var(--danger);
+  border-color:#f4c7c7;
+}
+.btn-danger:hover{background:var(--danger-soft);border-color:#e5a5a5}
+.btn-green{
+  background:var(--success-soft);color:var(--success);
+  border-color:var(--success-border);
+}
+.btn-ghost{
+  background:transparent;color:#c7d5f0;
+  border:1px solid rgba(255,255,255,.22);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35)}
+
+/* ============== INPUTS ============== */
+label{
+  display:block;font-weight:500;font-size:12.5px;
+  margin-bottom:6px;color:var(--ink-2);
+  letter-spacing:-.005em;
+}
+input,textarea,select{
+  width:100%;border:1px solid var(--line-strong);
+  border-radius:8px;padding:9px 12px;
+  background:#fff;color:var(--ink);
+  font-size:13.5px;
+  transition:border-color .15s, box-shadow .15s;
+}
+input:focus,textarea:focus,select:focus{
+  outline:none;border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(29,78,216,.10);
+}
+textarea{
+  min-height:170px;resize:vertical;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;line-height:1.6;
+}
+.small{font-size:12.5px;color:var(--ink-3);line-height:1.55}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.spacer{flex:1}
+
+/* ============== BADGES ============== */
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 9px;border-radius:999px;
+  background:var(--n-100);color:var(--ink-2);
+  font-size:11.5px;font-weight:500;
+  border:1px solid var(--line);
+  letter-spacing:.005em;
+}
+.badge.ok{
+  background:var(--success-soft);color:var(--success);
+  border-color:var(--success-border);
+}
+.badge.warn{
+  background:var(--warning-soft);color:var(--warning);
+  border-color:var(--warning-border);
+}
+.badge.err{
+  background:var(--danger-soft);color:var(--danger);
+  border-color:var(--danger-border);
+}
+.badge .dot{
+  width:6px;height:6px;border-radius:50%;
+  background:currentColor;opacity:.85;
+}
+
+/* ============== SEQUENCE ROWS ============== */
+.sequence-row{
+  display:grid;grid-template-columns:1.05fr 2.7fr auto;
+  gap:10px;margin-bottom:8px;align-items:center;
+  padding:9px 11px;border-radius:9px;
+  background:var(--panel-subtle);
+  border:1px solid var(--line);
+  transition:border-color .15s, background .15s;
+}
+.sequence-row:hover{
+  border-color:var(--n-300);background:#fff;
+}
+.seq-dot{
+  width:10px;height:10px;border-radius:3px;
+  display:inline-block;margin-right:9px;
+  flex-shrink:0;
+}
+.seq-name-wrap{display:flex;align-items:center}
+.sequence-row input{background:#fff}
+.sequence-row .remove{
+  padding:8px 11px;border-radius:7px;
+  background:transparent;color:var(--ink-3);
+  font-weight:500;font-size:12.5px;
+  border:1px solid var(--line-strong);
+  transition:.15s;
+}
+.sequence-row .remove:hover{
+  background:var(--danger-soft);color:var(--danger);
+  border-color:#f4c7c7;
+}
+
+/* ============== TABS ============== */
+.tabs{
+  display:inline-flex;gap:2px;margin-bottom:16px;
+  background:var(--n-100);padding:3px;border-radius:9px;
+}
+.tab{
+  padding:6px 14px;border-radius:7px;
+  font-weight:500;font-size:12.5px;
+  color:var(--ink-3);background:transparent;
+  transition:.15s;
+}
+.tab.active{
+  background:#fff;color:var(--ink);
+  box-shadow:0 1px 2px rgba(15,23,42,.06);
+  font-weight:600;
+}
+
+/* ============== VALIDATION ============== */
+.validation-box{
+  border:1px solid var(--success-border);
+  background:var(--success-soft);
+  border-radius:12px;
+  padding:18px 20px;
+}
+.validation-box.error{
+  border-color:var(--danger-border);
+  background:var(--danger-soft);
+}
+.check{
+  margin:8px 0;
+  display:flex;gap:11px;align-items:flex-start;
+  font-size:13.5px;
+}
+.check .mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;
+  font-size:11px;font-weight:700;
+  flex-shrink:0;line-height:1;color:#fff;
+  margin-top:1px;
+}
+.check.ok .mark{background:var(--success)}
+.check.err .mark{background:var(--danger)}
+.check.ok .msg{color:#065f46;font-weight:500}
+.check.err .msg{color:#991b1b;font-weight:500}
+
+/* ============== TABLES ============== */
+.table-wrap{
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+}
+.data-table{
+  border-collapse:collapse;width:100%;
+  min-width:600px;font-size:13px;
+}
+.data-table th,.data-table td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  text-align:center;white-space:nowrap;
+}
+.data-table th{
+  background:var(--n-50);
+  font-size:11.5px;font-weight:600;
+  color:var(--ink-2);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  position:sticky;top:0;z-index:1;
+}
+.data-table tbody tr{transition:background .12s}
+.data-table tbody tr:hover{background:var(--n-25)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table .row-header{
+  background:var(--n-50);font-weight:600;
+  color:var(--ink-2);font-size:12px;
+}
+.data-table .cell-min{
+  background:#dcfce7!important;color:#065f46;
+  font-weight:700;
+  box-shadow:inset 0 0 0 1.5px #4ade80;
+}
+.data-table .cell-sel{
+  outline:2.5px solid #d97706;
+  outline-offset:-2.5px;
+  border-radius:3px;
+}
+.data-table td.clickable{cursor:pointer}
+.data-table td.clickable:hover{filter:brightness(.96)}
+.cell-note{
+  display:block;font-size:10.5px;
+  color:#065f46;font-weight:600;
+  margin-top:2px;text-transform:uppercase;letter-spacing:.05em;
+}
+
+/* ============== CODE / MATH ============== */
+.math{
+  background:#0b1220;
+  color:#cbd5e1;
+  padding:14px 16px;
+  border-radius:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;line-height:1.75;
+  overflow:auto;white-space:pre-wrap;
+  border:1px solid #1e293b;
+}
+pre.newick{
+  background:#0b1220;color:#7dd3fc;
+  padding:16px 18px;border-radius:10px;
+  white-space:pre-wrap;overflow:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;line-height:1.7;
+  border:1px solid #1e293b;
+  margin:0;
+}
+
+/* ============== CALLOUTS ============== */
+.callout{
+  padding:14px 16px;
+  border-radius:10px;
+  background:var(--primary-soft);
+  border:1px solid var(--primary-border);
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--ink-2);
+}
+.callout.warn{
+  background:var(--warning-soft);
+  border-color:var(--warning-border);
+  color:#78350f;
+}
+.callout.green{
+  background:var(--success-soft);
+  border-color:var(--success-border);
+  color:#065f46;
+}
+.callout.violet{
+  background:#f5f3ff;
+  border-color:#ddd6fe;
+  color:#4c1d95;
+}
+.callout strong{
+  display:block;margin-bottom:4px;
+  font-weight:600;font-size:13.5px;
+  color:inherit;
+}
+
+/* ============== STEP BANNER ============== */
+.step-banner{
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  padding:14px 16px;
+  border-radius:12px;
+  background:var(--panel-subtle);
+  border:1px solid var(--line);
+  margin-bottom:18px;
+}
+.step-count{
+  font-size:13.5px;font-weight:600;
+  color:var(--ink);
+  letter-spacing:-.005em;
+}
+.step-progress{
+  flex:1;min-width:140px;height:4px;
+  border-radius:999px;background:var(--n-150);
+  overflow:hidden;position:relative;
+}
+.step-progress .fill{
+  height:100%;
+  background:var(--primary);
+  border-radius:999px;
+  transition:width .35s ease;
+}
+.current-merge{
+  font-size:15px;font-weight:600;
+  color:var(--ink);
+  letter-spacing:-.01em;
+  margin-bottom:6px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ============== METRICS ============== */
+.metric-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+}
+.metric{
+  background:#fff;
+  padding:18px 20px;
+  transition:background .15s;
+  position:relative;
+}
+.metric:hover{background:var(--panel-subtle)}
+.metric .k{
+  font-size:11px;font-weight:600;
+  color:var(--ink-3);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:8px;
+  display:block;
+}
+.metric .v{
+  font-size:1.35rem;font-weight:600;
+  color:var(--ink);
+  letter-spacing:-.02em;
+  line-height:1.2;
+  font-variant-numeric:tabular-nums;
+}
+.metric .ex{
+  font-size:11.5px;color:var(--ink-4);
+  margin-top:6px;
+}
+
+/* ============== CHARTS ============== */
+.chart{height:280px;position:relative}
+.chart svg{width:100%;height:100%;display:block}
+.axis text{font-size:11px;fill:var(--ink-3)}
+.chart-title{
+  font-weight:600;font-size:13.5px;
+  margin-bottom:4px;color:var(--ink);
+  letter-spacing:-.005em;
+}
+.legend{
+  font-size:11.5px;color:var(--ink-3);
+  margin-top:8px;line-height:1.5;
+}
+
+/* ============== TREE ============== */
+.tree-toolbar{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  margin-bottom:14px;
+  padding:10px 12px;border-radius:10px;
+  background:var(--panel-subtle);
+  border:1px solid var(--line);
+}
+.tree-stage{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  overflow:auto;
+  min-height:620px;
+  position:relative;
+}
+.tree-stage svg{display:block;min-width:900px}
+.node-dot{
+  fill:#fff;
+  stroke-width:2.4;
+  transition:r .15s;
+}
+.node-dot:hover{r:7.5}
+.leaf-text{
+  font-weight:600;font-size:13px;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+.leaf-text:hover{opacity:.75}
+.branch{
+  fill:none;stroke-width:2;
+  stroke-linecap:round;cursor:pointer;
+  transition:stroke-width .12s, opacity .12s;
+}
+.branch:hover{stroke-width:3.5!important;opacity:.95}
+.internal-label{
+  font-size:10.5px;
+  font-weight:600;
+  fill:var(--ink-3);
+  pointer-events:none;
+  font-family:'JetBrains Mono',monospace;
+}
+.tree-empty{
+  display:grid;place-items:center;
+  min-height:520px;
+  color:var(--ink-3);padding:24px;
+  text-align:center;font-size:13.5px;
+}
+
+/* ============== FORMULAS ============== */
+.formula-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+.formula{
+  background:var(--panel-subtle);
+  border:1px solid var(--line);
+  padding:18px;border-radius:12px;
+}
+.formula h4{
+  margin:0 0 12px;
+  font-size:13px;font-weight:600;
+  color:var(--ink);
+  letter-spacing:-.005em;
+}
+.formula .math{margin-bottom:10px;font-size:12px}
+
+/* ============== FLOW ============== */
+.flow{
+  display:flex;align-items:center;gap:8px;
+  flex-wrap:wrap;margin-top:6px;
+}
+.flow .box{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px 14px;
+  font-weight:500;font-size:12.5px;
+  color:var(--ink-2);
+}
+.flow .arrow{
+  color:var(--ink-4);
+  font-weight:600;
+  font-size:14px;
+}
+
+/* ============== EMPTY ============== */
+.empty{
+  padding:36px;
+  text-align:center;
+  color:var(--ink-3);
+  font-size:13.5px;
+}
+
+/* ============== FOOTER ============== */
+.foot{
+  padding:36px 0 56px;
+  color:var(--ink-3);
+  font-size:12.5px;
+  border-top:1px solid var(--line);
+  background:#fafbfd;
+  margin-top:20px;
+}
+.foot-inner{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:20px;
+}
+.foot-left{
+  text-align:left;
+  line-height:1.5;
+}
+.foot-center{
+  text-align:center;
+  font-weight:600;
+  color:var(--ink);
+  padding:0 20px;
+  border-left:1px solid var(--line);
+  border-right:1px solid var(--line);
+  white-space:nowrap;
+  line-height:1.5;
+}
+.foot-center .author-name{
+  color:var(--primary);
+  font-weight:700;
+}
+.foot-right{
+  text-align:right;
+  line-height:1.5;
+}
+@media(max-width:760px){
+  .foot-inner{
+    grid-template-columns:1fr;
+    text-align:center;
+    gap:10px;
+  }
+  .foot-left,.foot-right{text-align:center}
+  .foot-center{
+    border-left:0;border-right:0;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:12px 0;
+    white-space:normal;
+  }
+}
+
+/* ============== EXPORT BAR ============== */
+.export-bar{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  padding:12px 14px;
+  border-radius:10px;
+  background:var(--panel-subtle);
+  border:1px solid var(--line);
+  margin-top:14px;
+}
+.export-bar .small{font-weight:600;color:var(--ink-2);font-size:12.5px}
+
+/* ============== MODAL / TOAST ============== */
+.modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(15,23,42,.55);
+  display:none;align-items:center;justify-content:center;
+  z-index:50;padding:18px;
+  backdrop-filter:blur(2px);
+}
+.modal{
+  background:#fff;max-width:780px;width:100%;
+  max-height:90vh;overflow:auto;
+  border-radius:14px;
+  box-shadow:0 24px 60px rgba(15,23,42,.35);
+  padding:26px;
+}
+.modal h3{margin-top:0}
+.close-x{
+  float:right;background:var(--n-100);
+  border-radius:7px;padding:6px 11px;
+  font-weight:600;font-size:14px;color:var(--ink-2);
+}
+.close-x:hover{background:var(--n-150)}
+.toast{
+  position:fixed;right:22px;bottom:22px;
+  background:var(--n-900);
+  color:#fff;
+  padding:12px 16px;
+  border-radius:9px;
+  box-shadow:0 12px 30px rgba(15,23,42,.32);
+  opacity:0;transform:translateY(8px);
+  transition:.22s;
+  z-index:60;pointer-events:none;
+  font-weight:500;font-size:13px;
+  max-width:min(420px,calc(100vw - 44px));
+}
+.toast.show{opacity:1;transform:none}
+
+/* ============== RESPONSIVE ============== */
+@media(max-width:1000px){
+  .features{grid-template-columns:1fr}
+  .col-8,.col-7,.col-6,.col-5,.col-4,.col-3{grid-column:span 12}
+  .metric-grid{grid-template-columns:repeat(2,1fr);gap:1px}
+  .sequence-row{grid-template-columns:1fr}
+  .formula-grid{grid-template-columns:1fr}
+  .hero{padding:48px 0 44px}
+}
+@media(max-width:560px){
+  body{font-size:14px}
+  .metric-grid{grid-template-columns:1fr}
+  .hero{padding:40px 0 36px}
+  .section{padding:36px 0}
+  .card{padding:18px}
+  .container{padding:0 18px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero" id="home">
+  <div class="container">
+    <span class="tag">M.Tech Bioinformatics · Educational Tool</span>
+    <h1>UPGMA Phylogenetic Tree &amp; <em>Metrics Analyzer</em></h1>
+    <p>An interactive environment for understanding how aligned DNA sequences become a distance matrix, and how UPGMA progressively merges clusters to construct a rooted phylogenetic tree.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" id="startBtn">Start UPGMA Analysis</button>
+      <button class="btn btn-ghost" id="loadExampleHero">Load Example Dataset</button>
+    </div>
+    <div class="features">
+      <div class="feature">
+        <div class="label">Module 01</div>
+        <b>Distance Matrix</b>
+        <span>Calculate, inspect, and visualize pairwise p-distances with a heatmap view.</span>
+      </div>
+      <div class="feature">
+        <div class="label">Module 02</div>
+        <b>UPGMA Metrics</b>
+        <span>Trace cluster sizes, merge distances, node heights, and branch lengths.</span>
+      </div>
+      <div class="feature">
+        <div class="label">Module 03</div>
+        <b>Tree Analysis</b>
+        <span>Watch the rooted tree emerge from the exact merge history, merge by merge.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="#input">Input</a>
+    <a href="#validation">Validation</a>
+    <a href="#distance">Distances</a>
+    <a href="#steps">Steps</a>
+    <a href="#metrics">Metrics</a>
+    <a href="#tree">Tree</a>
+    <a href="#newick">Newick</a>
+    <a href="#formulas">Formulas</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- 1. INPUT -->
+<section class="section" id="input">
+  <div class="container">
+    <h2><span class="num">01</span> Enter DNA Sequences</h2>
+    <p class="lead">Use aligned sequences of equal length. This educational implementation uses p-distance only.</p>
+    <div class="grid">
+      <div class="card col-8">
+        <div class="tabs">
+          <button class="tab active" data-input-tab="rows">Sequence Rows</button>
+          <button class="tab" data-input-tab="fasta">FASTA</button>
+        </div>
+        <div id="rowsTab">
+          <div id="sequenceRows"></div>
+          <div class="toolbar" style="margin-top:6px">
+            <button class="btn btn-soft" id="addSeqBtn">Add Sequence</button>
+            <button class="btn btn-soft" id="loadExampleBtn">Load Example</button>
+            <button class="btn btn-danger" id="clearBtn">Clear All</button>
+            <span class="spacer"></span>
+            <button class="btn btn-blue" id="validateBtn">Run Validation &amp; Analysis</button>
+          </div>
+        </div>
+        <div id="fastaTab" style="display:none">
+          <label for="fastaInput">FASTA text</label>
+          <textarea id="fastaInput" placeholder=">A&#10;ATGCT...&#10;>B&#10;ATGAT..."></textarea>
+          <div class="toolbar" style="margin-top:12px">
+            <button class="btn btn-soft" id="parseFastaBtn">Parse FASTA</button>
+            <span class="small">Header names are taken from the text after <code>&gt;</code>.</span>
+          </div>
+        </div>
+      </div>
+      <div class="card col-4">
+        <div class="card-head"><h3>Learning Workflow</h3></div>
+        <div class="flow" style="flex-direction:column;align-items:stretch;gap:4px">
+          <div class="box">DNA sequences</div>
+          <div class="arrow" style="text-align:center">↓</div>
+          <div class="box">Validation</div>
+          <div class="arrow" style="text-align:center">↓</div>
+          <div class="box">p-distance matrix</div>
+          <div class="arrow" style="text-align:center">↓</div>
+          <div class="box">UPGMA iterations</div>
+          <div class="arrow" style="text-align:center">↓</div>
+          <div class="box">Merge history + node heights</div>
+          <div class="arrow" style="text-align:center">↓</div>
+          <div class="box">Rooted tree</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. VALIDATION -->
+<section class="section" id="validation">
+  <div class="container">
+    <h2><span class="num">02</span> Sequence Validation</h2>
+    <p class="lead">Validation prevents a mathematically inconsistent analysis before any distance or tree calculation begins.</p>
+    <div class="card"><div id="validationPanel" class="empty">Enter sequences and press <b>Run Validation &amp; Analysis</b>.</div></div>
+  </div>
+</section>
+
+<!-- 3. DISTANCES -->
+<section class="section" id="distance">
+  <div class="container">
+    <h2><span class="num">03</span> Pairwise Distances &amp; Initial Matrix</h2>
+    <p class="lead">p-distance = number of different aligned nucleotide positions ÷ sequence length.</p>
+    <div class="grid">
+      <div class="card col-5">
+        <div class="card-head"><h3>Distance Calculation</h3></div>
+        <div id="pairCalc" class="empty">Click a non-zero cell in the matrix to inspect its calculation.</div>
+      </div>
+      <div class="card col-7">
+        <div class="card-head">
+          <h3>Initial Distance Matrix</h3>
+          <span class="badge">Heatmap view</span>
+        </div>
+        <div id="initialMatrix" class="empty">Run a valid analysis first.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. STEPS -->
+<section class="section" id="steps">
+  <div class="container">
+    <h2><span class="num">04</span> UPGMA Step-by-Step Analysis</h2>
+    <p class="lead">The algorithm is implemented explicitly. The same merge history drives the updated matrices, charts, tree, and Newick output.</p>
+    <div class="card">
+      <div class="step-banner">
+        <span class="step-count" id="stepLabel">Iteration 0 of 0</span>
+        <div class="step-progress"><div class="fill" id="stepProgressFill" style="width:0%"></div></div>
+        <span id="stepBadge" class="badge">No analysis yet</span>
+        <span class="spacer"></span>
+        <button class="btn btn-soft" id="prevStep">Previous</button>
+        <button class="btn btn-blue" id="nextStep">Next</button>
+        <button class="btn btn-soft" id="playSteps">Play</button>
+        <button class="btn btn-soft" id="restartSteps">Restart</button>
+        <button class="btn btn-soft" id="showAllSteps">Show All</button>
+      </div>
+      <div id="stepContent" class="empty">Load a valid dataset to begin.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. METRICS -->
+<section class="section" id="metrics">
+  <div class="container">
+    <h2><span class="num">05</span> UPGMA Metrics Dashboard</h2>
+    <p class="lead">All values below are derived from the same explicit UPGMA analysis object — no separate tree calculations are performed.</p>
+    <div class="card">
+      <div class="card-head"><h3>Key Metrics</h3><span class="subtitle">Derived from the initial distance matrix and the final root</span></div>
+      <div class="metric-grid" id="metricCards"></div>
+      <div class="export-bar">
+        <span class="small">Export:</span>
+        <button class="btn btn-soft" id="expDist">Distance CSV</button>
+        <button class="btn btn-soft" id="expMerge">Merge History CSV</button>
+        <button class="btn btn-soft" id="expMetric">Metrics CSV</button>
+        <button class="btn btn-soft" id="expTxt">Complete TXT</button>
+      </div>
+    </div>
+    <div class="grid" style="margin-top:18px">
+      <div class="card col-6">
+        <div class="chart-title">Merge Distance by Iteration</div>
+        <div id="mergeChart" class="chart"></div>
+        <div class="legend">Y-axis: distance at which the selected clusters were merged.</div>
+      </div>
+      <div class="card col-6">
+        <div class="chart-title">Node Height by Iteration</div>
+        <div id="heightChart" class="chart"></div>
+        <div class="legend">Y-axis: node height = merge distance ÷ 2.</div>
+      </div>
+      <div class="card col-6">
+        <div class="chart-title">New Cluster Size</div>
+        <div id="sizeChart" class="chart"></div>
+        <div class="legend">Y-axis: number of leaves in the newly formed cluster.</div>
+      </div>
+      <div class="card col-6">
+        <div class="card-head"><h3>Merge History</h3><span class="subtitle">Click any row to jump to that iteration</span></div>
+        <div id="mergeTable" class="empty">Run an analysis first.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. TREE -->
+<section class="section" id="tree">
+  <div class="container">
+    <h2><span class="num">06</span> Final UPGMA Phylogenetic Tree</h2>
+    <p class="lead">The tree is generated from the actual merge history, node heights, and branch lengths.</p>
+    <div class="card">
+      <div class="tree-toolbar">
+        <button class="btn btn-blue" id="animateTreeBtn">Animate Construction</button>
+        <button class="btn btn-soft" id="treePauseBtn">Pause</button>
+        <button class="btn btn-soft" id="treeBackBtn">Step Back</button>
+        <button class="btn btn-soft" id="treeForwardBtn">Step Forward</button>
+        <button class="btn btn-soft" id="treeResetBtn">Reset</button>
+        <span class="spacer"></span>
+        <button class="btn btn-soft" id="downloadSvgBtn">Download SVG</button>
+        <button class="btn btn-soft" id="downloadPngBtn">Download PNG</button>
+        <span id="treeStepInfo" class="badge">Iteration 0</span>
+      </div>
+      <div class="tree-stage" id="treeStage">
+        <div class="tree-empty">Run an analysis to generate the tree.</div>
+      </div>
+      <div id="treeInfo" class="callout" style="margin-top:14px">
+        Click a leaf, internal node, or branch to inspect the corresponding biological or mathematical information.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. NEWICK -->
+<section class="section" id="newick">
+  <div class="container">
+    <h2><span class="num">07</span> Newick Representation</h2>
+    <p class="lead">This Newick string is generated directly from the same tree structure shown above.</p>
+    <div class="card">
+      <pre id="newickText" class="newick">No analysis yet.</pre>
+      <div class="toolbar" style="margin-top:12px">
+        <button class="btn btn-blue" id="copyNewickBtn">Copy Newick</button>
+        <button class="btn btn-soft" id="downloadNewickBtn">Download .nwk</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. FORMULAS -->
+<section class="section" id="formulas">
+  <div class="container">
+    <h2><span class="num">08</span> UPGMA Formula Sheet &amp; Concepts</h2>
+    <p class="lead">Keep this section open while stepping through the analysis.</p>
+    <div class="card">
+      <div class="formula-grid">
+        <div class="formula">
+          <h4>p-distance</h4>
+          <div class="math">d(A,B) = differences / sequence length</div>
+          <p class="small">For aligned DNA sequences, every position is compared directly.</p>
+        </div>
+        <div class="formula">
+          <h4>Cluster distance</h4>
+          <div class="math">d(X,Y) = Σ d(i,j) / (|X| × |Y|)</div>
+          <p class="small">Average all sequence-to-sequence distances between two clusters.</p>
+        </div>
+        <div class="formula">
+          <h4>Weighted update</h4>
+          <div class="math">d(X∪Y,Z) = [|X|·d(X,Z) + |Y|·d(Y,Z)] / (|X|+|Y|)</div>
+          <p class="small">This is the efficient UPGMA arithmetic-mean update.</p>
+        </div>
+        <div class="formula">
+          <h4>Node height</h4>
+          <div class="math">h = d(X,Y) / 2</div>
+          <p class="small">The merge distance is twice the height above the leaves under UPGMA.</p>
+        </div>
+        <div class="formula">
+          <h4>Branch length</h4>
+          <div class="math">branch = parent height − child height</div>
+          <p class="small">Leaves start at height 0.</p>
+        </div>
+        <div class="formula">
+          <h4>UPGMA assumption</h4>
+          <div class="callout warn">
+            <strong>Molecular-clock assumption</strong>
+            UPGMA assumes approximately equal evolutionary rates among lineages, producing an ultrametric/rooted interpretation. Strongly unequal rates can make UPGMA misleading.
+          </div>
+        </div>
+      </div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:26px 0">
+      <h3 style="margin:0 0 8px;font-size:.98rem">Algorithm Flow</h3>
+      <div class="flow">
+        <div class="box">Input sequences</div><span class="arrow">→</span>
+        <div class="box">Calculate distances</div><span class="arrow">→</span>
+        <div class="box">Find smallest distance</div><span class="arrow">→</span>
+        <div class="box">Merge clusters</div><span class="arrow">→</span>
+        <div class="box">Update matrix</div><span class="arrow">→</span>
+        <div class="box">Repeat</div><span class="arrow">→</span>
+        <div class="box">Rooted tree</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============== FOOTER ============== -->
+<footer class="foot">
+  <div class="container foot-inner">
+    <div class="foot-left">
+      UPGMA Phylogenetic Tree &amp; Metrics Analyzer<br>
+      Educational implementation using aligned DNA sequences and p-distance.
+    </div>
+
+    <div class="foot-center">
+      Developed by <span class="author-name">HET MEVADA</span>
+    </div>
+
+    <div class="foot-right">
+      M.Tech Bioinformatics<br>
+      Educational Tool
+    </div>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <button class="close-x" id="modalClose">×</button>
+    <h3 id="modalTitle">Details</h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* =================================================================== *
+   * STATE
+   * =================================================================== */
+  const state = {
+    analysis: null,
+    step: 0,
+    treeStep: 0,
+    playing: null,
+    animating: null
+  };
+
+  const EXAMPLE = [
+    {name:'A', seq:'ATGCGTACGATCGTACGATCGTAGCTAGCTAG'},
+    {name:'B', seq:'TTGCGTACGATCGTACGATCGTAGCTAGCTAG'},
+    {name:'C', seq:'TTGAGTACGATCGTACGATCGTAGCTAGCTAG'},
+    {name:'D', seq:'TTGAGTACGCTCGTACGATCGTAGCTAGCTAG'},
+    {name:'E', seq:'ATGCGTACGATCATACGATCGTAGCTAGCTAG'},
+    {name:'F', seq:'ATGCGTACGATCATACGATCGTAACTAGCTAG'},
+    {name:'G', seq:'ATGCGTACGATCATACGATCGTAACTCGCTAG'},
+    {name:'H', seq:'ATGCGTACGATCATACGATCGTAACTCGCTCG'}
+  ];
+
+  const PALETTE = [
+    '#1d4ed8','#7c3aed','#0e7490','#047857','#b45309','#be185d',
+    '#4338ca','#0f766e','#a16207','#9333ea','#0369a1','#65a30d'
+  ];
+
+  /* =================================================================== *
+   * HELPERS
+   * =================================================================== */
+  const $ = id => document.getElementById(id);
+  const round = (x, n = 4) => Number(Number(x).toFixed(n));
+  const esc = s => String(s).replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+  const fmt = x => Number(x).toFixed(4);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const hasKids = n => Array.isArray(n.children) && n.children.length > 0;
+  const isLeaf = n => !hasKids(n);
+  const colorFor = i => PALETTE[i % PALETTE.length];
+
+  let toastTimer = null;
+  function toast(msg){
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* =================================================================== *
+   * SEQUENCE ROWS
+   * =================================================================== */
+  function addRow(item = {name:'', seq:''}){
+    const wrap = document.createElement('div');
+    wrap.className = 'sequence-row';
+    const idx = $('sequenceRows').children.length;
+    const color = colorFor(idx);
+    wrap.innerHTML =
+      '<div class="seq-name-wrap">' +
+        '<span class="seq-dot" style="background:' + color + '"></span>' +
+        '<input class="seq-name" placeholder="Sequence name" value="' + esc(item.name || '') + '">' +
+      '</div>' +
+      '<input class="seq-data" placeholder="DNA sequence (A/T/G/C)" value="' + esc(item.seq || '') + '">' +
+      '<button class="remove" title="Remove sequence" type="button">Remove</button>';
+    wrap.querySelector('.remove').addEventListener('click', () => {
+      wrap.remove();
+      reindexRowColors();
+    });
+    $('sequenceRows').appendChild(wrap);
+  }
+
+  function reindexRowColors(){
+    [...$('sequenceRows').children].forEach((row, i) => {
+      const dot = row.querySelector('.seq-dot');
+      if(dot) dot.style.background = colorFor(i);
+    });
+  }
+
+  function populateRows(data){
+    $('sequenceRows').innerHTML = '';
+    data.forEach(d => addRow(d));
+    if(!data.length) addRow({name:'A', seq:''});
+  }
+
+  function readRows(){
+    const rows = [...document.querySelectorAll('.sequence-row')].map(r => ({
+      name: r.querySelector('.seq-name').value.trim(),
+      seq: r.querySelector('.seq-data').value.trim().toUpperCase().replace(/\s+/g, '')
+    }));
+    return rows.filter(r => r.name !== '' || r.seq !== '');
+  }
+
+  function clearAll(){
+    populateRows([{name:'A', seq:''}, {name:'B', seq:''}]);
+    $('fastaInput').value = '';
+    resetAnalysis();
+    $('validationPanel').innerHTML =
+      '<div class="empty">Enter sequences and press <b>Run Validation &amp; Analysis</b>.</div>';
+  }
+
+  function parseFastaText(text){
+    const out = [];
+    let current = null;
+    for(const raw of text.split(/\r?\n/)){
+      const line = raw.trim();
+      if(!line) continue;
+      if(line.startsWith('>')){
+        if(current) out.push(current);
+        current = {name: line.slice(1).trim(), seq: ''};
+      } else {
+        if(!current) throw new Error('FASTA sequence data was found before a header line starting with >.');
+        current.seq += line.replace(/\s+/g, '').toUpperCase();
+      }
+    }
+    if(current) out.push(current);
+    if(!out.length) throw new Error('No FASTA records were detected.');
+    return out;
+  }
+
+  /* =================================================================== *
+   * VALIDATION
+   * =================================================================== */
+  function validate(data){
+    const duplicates = [...new Set(
+      data.map(x => x.name).filter((n, i, a) => n && a.indexOf(n) !== i)
+    )];
+    const blankNames = data.map((x, i) => x.name ? -1 : i + 1).filter(i => i > 0);
+    const invalidBySeq = data
+      .map(x => ({name: x.name || '(unnamed)', chars: [...new Set(x.seq.match(/[^ATGC]/g) || [])]}))
+      .filter(x => x.chars.length);
+
+    const countOk   = data.length >= 2;
+    const namesOk   = countOk && blankNames.length === 0 && duplicates.length === 0;
+    const alphabetOk = data.length > 0 && data.every(x => x.seq && /^[ATGC]+$/.test(x.seq));
+    const lengths   = [...new Set(data.map(x => x.seq.length))];
+    const sameLen   = countOk && lengths.length === 1 && lengths[0] > 0;
+
+    const valid = countOk && namesOk && alphabetOk && sameLen;
+
+    const nameMsg = namesOk
+      ? 'All names are unique and non-empty'
+      : [
+          blankNames.length ? 'Empty name at row(s): ' + blankNames.join(', ') : '',
+          duplicates.length ? 'Duplicate name(s): ' + duplicates.join(', ') : ''
+        ].filter(Boolean).join(' · ') || 'Sequence names are required and must be unique';
+
+    const dnaMsg = alphabetOk
+      ? 'All sequences contain valid DNA bases (A, T, G, C)'
+      : (invalidBySeq.length
+          ? invalidBySeq.map(x => x.name + ': ' + x.chars.join(', ')).join(' · ')
+          : 'All sequences must contain at least one base');
+
+    const lenMsg = sameLen
+      ? 'All sequences have equal length = ' + lengths[0] + ' bp'
+      : 'All sequences must have the same length. Detected: ' +
+        data.map(x => (x.name || '(unnamed)') + '=' + x.seq.length + ' bp').join(', ');
+
+    const lines = [
+      [countOk, data.length + ' sequences detected (minimum = 2)'],
+      [namesOk, nameMsg],
+      [alphabetOk, dnaMsg],
+      [sameLen, lenMsg]
+    ];
+
+    $('validationPanel').innerHTML =
+      '<div class="validation-box ' + (valid ? '' : 'error') + '">' +
+      lines.map(([ok, msg]) =>
+        '<div class="check ' + (ok ? 'ok' : 'err') + '">' +
+          '<span class="mark">' + (ok ? '✓' : '✕') + '</span>' +
+          '<span class="msg">' + esc(msg) + '</span>' +
+        '</div>'
+      ).join('') +
+      '<div style="margin-top:14px;font-weight:600;font-size:13.5px;color:' +
+        (valid ? '#065f46' : '#991b1b') + '">' +
+        (valid ? 'Validation passed. Ready for UPGMA analysis.' :
+                 'Fix the highlighted issue(s) before running the analysis.') +
+      '</div></div>';
+
+    return {valid, countOk, namesOk, alphabetOk, sameLen, length: lengths[0] || 0};
+  }
+
+  /* =================================================================== *
+   * DISTANCE CALCULATIONS
+   * =================================================================== */
+  const pairKey = (a, b) => [a, b].sort().join('||');
+
+  function pairDistance(a, b){
+    let diff = 0;
+    const positions = [];
+    const n = Math.min(a.length, b.length);
+    for(let i = 0; i < n; i++){
+      if(a[i] !== b[i]){ diff++; positions.push(i + 1); }
+    }
+    return {diff, length: n, d: n ? diff / n : 0, positions};
+  }
+
+  function baseDistanceMatrix(seqs){
+    const n = seqs.length;
+    const m = Array.from({length: n}, () => Array(n).fill(0));
+    const details = new Map();
+    for(let i = 0; i < n; i++){
+      for(let j = i + 1; j < n; j++){
+        const p = pairDistance(seqs[i].seq, seqs[j].seq);
+        m[i][j] = m[j][i] = p.d;
+        details.set(pairKey(seqs[i].name, seqs[j].name), {a: seqs[i], b: seqs[j], ...p});
+      }
+    }
+    return {m, details};
+  }
+
+  function clusterDistance(a, b, baseMatrix, nameIndex){
+    let sum = 0, count = 0;
+    for(const x of a.members){
+      for(const y of b.members){
+        sum += baseMatrix[nameIndex.get(x)][nameIndex.get(y)];
+        count++;
+      }
+    }
+    return count ? sum / count : 0;
+  }
+
+  function matrixForClusters(clusters, baseMatrix, nameIndex){
+    const n = clusters.length;
+    const out = Array.from({length: n}, () => Array(n).fill(0));
+    for(let i = 0; i < n; i++){
+      for(let j = i + 1; j < n; j++){
+        const d = clusterDistance(clusters[i], clusters[j], baseMatrix, nameIndex);
+        out[i][j] = out[j][i] = d;
+      }
+    }
+    return out;
+  }
+
+  function cloneCluster(c){
+    return {
+      id: c.id,
+      members: [...c.members],
+      size: c.size,
+      height: c.height,
+      createdAt: c.createdAt,
+      order: c.order,
+      children: c.children ? c.children.map(ch => ({
+        id: ch.id,
+        members: [...ch.members],
+        size: ch.size,
+        height: ch.height,
+        branchLength: ch.branchLength,
+        children: ch.children ? ch.children.map(g => ({...g})) : []
+      })) : []
+    };
+  }
+
+  /* =================================================================== *
+   * UPGMA CORE
+   * =================================================================== */
+  function buildUPGMA(seqs){
+    const base = baseDistanceMatrix(seqs);
+    const nameIndex = new Map(seqs.map((s, i) => [s.name, i]));
+    const seqColor = new Map(seqs.map((s, i) => [s.name, colorFor(i)]));
+
+    let clusters = seqs.map((s, i) => ({
+      id: s.name, members: [s.name], size: 1, height: 0, children: [], createdAt: 0, order: i
+    }));
+
+    const mergeHistory = [];
+    const matrices = [];
+
+    matrices.push({
+      iteration: 0,
+      clusters: clusters.map(cloneCluster),
+      matrix: matrixForClusters(clusters, base.m, nameIndex)
+    });
+
+    let iteration = 0;
+
+    while(clusters.length > 1){
+      iteration++;
+      const mat = matrixForClusters(clusters, base.m, nameIndex);
+
+      let bi = 0, bj = 1, best = mat[0][1];
+      for(let i = 0; i < clusters.length; i++){
+        for(let j = i + 1; j < clusters.length; j++){
+          const d = mat[i][j];
+          const better = d < best - 1e-12;
+          const tie = Math.abs(d - best) <= 1e-12 &&
+                      (clusters[i].id + '|' + clusters[j].id) < (clusters[bi].id + '|' + clusters[bj].id);
+          if(better || tie){ best = d; bi = i; bj = j; }
+        }
+      }
+
+      const left = clusters[bi];
+      const right = clusters[bj];
+      const newHeight = best / 2;
+      const leftBranch = round(newHeight - left.height, 10);
+      const rightBranch = round(newHeight - right.height, 10);
+
+      const calculations = [];
+      for(let k = 0; k < clusters.length; k++){
+        if(k === bi || k === bj) continue;
+        const z = clusters[k];
+        const dL = clusterDistance(left, z, base.m, nameIndex);
+        const dR = clusterDistance(right, z, base.m, nameIndex);
+        const upd = (left.size * dL + right.size * dR) / (left.size + right.size);
+        calculations.push({
+          z: z.id, dL, dR,
+          calc: '[' + left.size + ' × ' + fmt(dL) + ' + ' + right.size + ' × ' + fmt(dR) + '] / ' +
+                (left.size + right.size) + ' = ' + fmt(upd),
+          value: upd
+        });
+      }
+
+      const newCluster = {
+        id: left.id + right.id,
+        members: [...left.members, ...right.members],
+        size: left.size + right.size,
+        height: newHeight,
+        createdAt: iteration,
+        order: clusters.length,
+        children: [
+          {...left,  branchLength: leftBranch},
+          {...right, branchLength: rightBranch}
+        ]
+      };
+
+      mergeHistory.push({
+        iteration,
+        left: left.id, right: right.id,
+        distance: best,
+        newCluster: newCluster.id,
+        size: newCluster.size,
+        height: newHeight,
+        leftHeight: left.height,
+        rightHeight: right.height,
+        leftBranch, rightBranch,
+        calculations,
+        members: newCluster.members.slice(),
+        leftMembers: left.members.slice(),
+        rightMembers: right.members.slice()
+      });
+
+      clusters = clusters
+        .filter((_, idx) => idx !== bi && idx !== bj)
+        .concat(newCluster)
+        .sort((a, b) => (a.createdAt - b.createdAt) || (a.order - b.order));
+
+      matrices.push({
+        iteration,
+        clusters: clusters.map(cloneCluster),
+        matrix: matrixForClusters(clusters, base.m, nameIndex)
+      });
+    }
+
+    return {
+      seqs, base, matrices, mergeHistory,
+      root: clusters[0],
+      iterations: mergeHistory.length,
+      seqColor
+    };
+  }
+
+  /* =================================================================== *
+   * ANALYSIS ENTRY
+   * =================================================================== */
+  function runAnalysis(){
+    const data = readRows();
+    const v = validate(data);
+
+    if(!v.valid){
+      state.analysis = null;
+      stopPlayback();
+      stopAnimation();
+      renderAll();
+      toast('Validation failed — please fix the input');
+      return;
+    }
+
+    state.analysis = buildUPGMA(data);
+    state.step = 0;
+    state.treeStep = 0;
+    stopPlayback();
+    stopAnimation();
+    renderAll();
+    toast('UPGMA analysis completed');
+  }
+
+  function resetAnalysis(){
+    state.analysis = null;
+    state.step = 0;
+    state.treeStep = 0;
+    stopPlayback();
+    stopAnimation();
+    renderAll();
+  }
+
+  /* =================================================================== *
+   * MATRIX RENDER
+   * =================================================================== */
+  function clusterColor(clusterId){
+    if(!state.analysis) return '#64748b';
+    const firstMember = clusterId.split(/(?=[A-Z])/)[0];
+    const seq = state.analysis.seqs.find(s => s.name === firstMember) ||
+                state.analysis.seqs.find(s => clusterId.startsWith(s.name));
+    if(seq) return state.analysis.seqColor.get(seq.name) || '#64748b';
+    return '#64748b';
+  }
+
+  function matrixHTML(snapshot, highlightPair, clickable){
+    const cs = snapshot.clusters;
+    const m = snapshot.matrix;
+    if(!cs.length) return '<div class="empty">No clusters.</div>';
+
+    let min = Infinity, max = 0;
+    for(let i = 0; i < m.length; i++){
+      for(let j = 0; j < m.length; j++){
+        if(i !== j){
+          if(m[i][j] < min) min = m[i][j];
+          if(m[i][j] > max) max = m[i][j];
+        }
+      }
+    }
+
+    let html = '<div class="table-wrap"><table class="data-table"><thead><tr><th></th>' +
+      cs.map(c => {
+        const color = clusterColor(c.id);
+        return '<th style="border-bottom:2px solid ' + color + '">' + esc(c.id) + '</th>';
+      }).join('') + '</tr></thead><tbody>';
+
+    for(let i = 0; i < cs.length; i++){
+      const color = clusterColor(cs[i].id);
+      html += '<tr><th class="row-header" style="border-right:2px solid ' + color + '">' + esc(cs[i].id) + '</th>';
+      for(let j = 0; j < cs.length; j++){
+        const isDiag = i === j;
+        const isMin = !isDiag && cs.length > 1 && Math.abs(m[i][j] - min) < 1e-12;
+        const isSel = !!highlightPair && (
+          (highlightPair[0] === cs[i].id && highlightPair[1] === cs[j].id) ||
+          (highlightPair[0] === cs[j].id && highlightPair[1] === cs[i].id)
+        );
+
+        let style = '';
+        if(!isDiag && max > 0){
+          const t = m[i][j] / max;
+          const r = Math.round(239 - (239 - 30) * t);
+          const g = Math.round(246 - (246 - 41) * t);
+          const b = Math.round(255 - (255 - 130) * t);
+          style = 'background:rgb(' + r + ',' + g + ',' + b + ');' +
+                  'color:' + (t > 0.55 ? '#fff' : '#0f172a') + ';' +
+                  'font-variant-numeric:tabular-nums;';
+        }
+
+        const cls = [
+          isMin ? 'cell-min' : '',
+          isSel ? 'cell-sel' : '',
+          (clickable && !isDiag) ? 'clickable' : ''
+        ].filter(Boolean).join(' ');
+
+        html += '<td style="' + style + '" class="' + cls + '" data-i="' + i + '" data-j="' + j + '">' +
+                fmt(m[i][j]) +
+                (isMin ? '<span class="cell-note">min</span>' : '') +
+                '</td>';
+      }
+      html += '</tr>';
+    }
+
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function renderInitialMatrix(){
+    const box = $('initialMatrix');
+    if(!state.analysis){
+      box.innerHTML = '<div class="empty">Run a valid analysis first.</div>';
+      $('pairCalc').innerHTML = 'Click a non-zero cell in the matrix to inspect its calculation.';
+      return;
+    }
+
+    const snap = state.analysis.matrices[0];
+    box.innerHTML = matrixHTML(snap, null, true);
+
+    box.querySelectorAll('td.clickable').forEach(td => {
+      td.addEventListener('click', () => {
+        const i = +td.dataset.i, j = +td.dataset.j;
+        if(i === j) return;
+        const a = snap.clusters[i].id, b = snap.clusters[j].id;
+        const info = state.analysis.base.details.get(pairKey(a, b));
+        if(info) renderPairCalc(info);
+      });
+    });
+  }
+
+  function renderPairCalc(info){
+    const positions = info.positions.length
+      ? info.positions.map(x => '<span class="badge" style="font-family:\'JetBrains Mono\',monospace">' + x + '</span>').join(' ')
+      : '<span class="small">None</span>';
+
+    $('pairCalc').innerHTML =
+      '<div class="callout" style="margin-bottom:12px"><strong>Comparison</strong>' +
+      'Between <b>' + esc(info.a.name) + '</b> and <b>' + esc(info.b.name) + '</b></div>' +
+      '<div style="font-size:12.5px;color:var(--ink-2)"><b>' + esc(info.a.name) + '</b>' +
+      '<div style="margin-top:5px;word-break:break-all;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:var(--ink-3);line-height:1.65">' + esc(info.a.seq) + '</div></div>' +
+      '<div style="font-size:12.5px;color:var(--ink-2);margin-top:12px"><b>' + esc(info.b.name) + '</b>' +
+      '<div style="margin-top:5px;word-break:break-all;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:var(--ink-3);line-height:1.65">' + esc(info.b.seq) + '</div></div>' +
+      '<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">' +
+      '<div style="display:flex;gap:22px;flex-wrap:wrap;font-size:13px">' +
+        '<div><span class="small">Sequence length</span><br><b style="font-size:15px">' + info.length + ' bp</b></div>' +
+        '<div><span class="small">Differences</span><br><b style="font-size:15px">' + info.diff + '</b></div>' +
+      '</div>' +
+      '<div style="margin-top:14px"><span class="small">Difference positions</span><br>' +
+      '<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">' + positions + '</div></div>' +
+      '<div class="math" style="margin-top:16px">p-distance = differences / length\n' +
+      '           = ' + info.diff + ' / ' + info.length + '\n' +
+      '           = ' + fmt(info.d) + '</div>';
+  }
+
+  /* =================================================================== *
+   * STEP RENDER
+   * =================================================================== */
+  function renderStep(){
+    const a = state.analysis;
+
+    if(!a){
+      $('stepLabel').textContent = 'Iteration 0 of 0';
+      $('stepBadge').textContent = 'No analysis yet';
+      $('stepBadge').className = 'badge';
+      $('stepProgressFill').style.width = '0%';
+      $('stepContent').innerHTML = '<div class="empty">Load a valid dataset to begin.</div>';
+      return;
+    }
+
+    const k = clamp(state.step, 0, a.iterations);
+    state.step = k;
+
+    $('stepLabel').textContent = 'Iteration ' + k + ' of ' + a.iterations;
+    $('stepBadge').textContent = k === 0 ? 'Initial matrix' : ('After merge ' + k);
+    $('stepBadge').className = 'badge ' + (k === a.iterations ? 'ok' : '');
+    $('stepProgressFill').style.width = ((k / Math.max(a.iterations, 1)) * 100).toFixed(1) + '%';
+
+    const snap = a.matrices[k];
+
+    let html =
+      '<div class="grid">' +
+        '<div class="card col-5" style="box-shadow:none;background:var(--panel-subtle)">' +
+          '<div class="card-head"><h3>Current Clusters</h3></div>' +
+          '<div class="table-wrap"><table class="data-table"><thead><tr>' +
+          '<th>Cluster</th><th>Members</th><th>Size</th><th>Height</th></tr></thead><tbody>' +
+          snap.clusters.map(c =>
+            '<tr><td><b style="color:' + clusterColor(c.id) + '">' + esc(c.id) + '</b></td>' +
+            '<td>' + esc(c.members.join(', ')) + '</td>' +
+            '<td>' + c.size + '</td><td>' + fmt(c.height) + '</td></tr>'
+          ).join('') +
+          '</tbody></table></div>' +
+        '</div>' +
+        '<div class="card col-7" style="box-shadow:none;background:var(--panel-subtle)">' +
+          '<div class="card-head"><h3>' + (k === 0 ? 'Initial' : 'Updated') + ' Distance Matrix</h3></div>' +
+          matrixHTML(snap, k > 0 ? [a.mergeHistory[k - 1].newCluster, a.mergeHistory[k - 1].left] : null, false) +
+        '</div>' +
+      '</div>';
+
+    if(k > 0){
+      const m = a.mergeHistory[k - 1];
+      html +=
+        '<div class="card" style="margin-top:16px;box-shadow:none;background:#fff">' +
+          '<div class="current-merge">Iteration ' + m.iteration + ': ' +
+            esc(m.left) + ' + ' + esc(m.right) + ' → ' + esc(m.newCluster) + '</div>' +
+          '<p class="small" style="margin:0 0 16px">Closest pair distance = <b style="color:var(--primary)">' + fmt(m.distance) + '</b></p>' +
+          '<div class="grid">' +
+            '<div class="card col-5" style="box-shadow:none;background:var(--panel-subtle)">' +
+              '<h3 style="margin-top:0;font-size:13px">Node Height</h3>' +
+              '<div class="math">h = merge distance / 2\n  = ' + fmt(m.distance) +
+              ' / 2\n  = ' + fmt(m.height) + '</div>' +
+            '</div>' +
+            '<div class="card col-7" style="box-shadow:none;background:var(--panel-subtle)">' +
+              '<h3 style="margin-top:0;font-size:13px">Branch Lengths</h3>' +
+              '<div class="math">' + esc(m.left) + ' branch = ' + fmt(m.height) + ' − ' +
+              fmt(m.leftHeight) + ' = ' + fmt(m.leftBranch) + '\n' +
+              esc(m.right) + ' branch = ' + fmt(m.height) + ' − ' +
+              fmt(m.rightHeight) + ' = ' + fmt(m.rightBranch) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<h3 style="margin-top:20px;font-size:13px">New Cluster Distance Calculations</h3>';
+
+      if(m.calculations.length){
+        html += '<div class="table-wrap"><table class="data-table"><thead><tr>' +
+          '<th>Target cluster Z</th><th>d(' + esc(m.left) + ', Z)</th><th>d(' + esc(m.right) + ', Z)</th>' +
+          '<th>UPGMA weighted mean</th><th>New distance</th></tr></thead><tbody>' +
+          m.calculations.map(c =>
+            '<tr><td><b>' + esc(c.z) + '</b></td><td>' + fmt(c.dL) + '</td><td>' + fmt(c.dR) + '</td>' +
+            '<td style="text-align:left;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:var(--ink-3)">' + esc(c.calc) + '</td>' +
+            '<td><b style="color:var(--primary)">' + fmt(c.value) + '</b></td></tr>'
+          ).join('') +
+          '</tbody></table></div>';
+      } else {
+        html += '<div class="callout green"><strong>Final merge</strong>No remaining target clusters. The new cluster is the root.</div>';
+      }
+      html += '</div>';
+    } else {
+      html += '<div class="callout" style="margin-top:16px"><strong>Starting point</strong>' +
+              'UPGMA begins with every sequence as a cluster. The highlighted (green) off-diagonal cell is the smallest ' +
+              'non-zero distance and is the next merge candidate.</div>';
+    }
+
+    $('stepContent').innerHTML = html;
+  }
+
+  /* =================================================================== *
+   * MERGE TABLE
+   * =================================================================== */
+  function renderMergeTable(){
+    const a = state.analysis;
+    if(!a){
+      $('mergeTable').innerHTML = '<div class="empty">Run an analysis first.</div>';
+      return;
+    }
+
+    const rows = a.mergeHistory.map(m =>
+      '<tr class="clickable" data-iter="' + m.iteration + '">' +
+        '<td>' + m.iteration + '</td>' +
+        '<td><b style="color:' + clusterColor(m.left) + '">' + esc(m.left) + '</b></td>' +
+        '<td><b style="color:' + clusterColor(m.right) + '">' + esc(m.right) + '</b></td>' +
+        '<td>' + fmt(m.distance) + '</td>' +
+        '<td><b style="color:' + clusterColor(m.newCluster) + '">' + esc(m.newCluster) + '</b></td>' +
+        '<td>' + m.size + '</td>' +
+        '<td>' + fmt(m.height) + '</td>' +
+      '</tr>'
+    ).join('');
+
+    $('mergeTable').innerHTML =
+      '<div class="table-wrap"><table class="data-table"><thead><tr>' +
+      '<th>Iter</th><th>Cluster 1</th><th>Cluster 2</th><th>Distance</th>' +
+      '<th>New Cluster</th><th>Size</th><th>Height</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+
+    $('mergeTable').querySelectorAll('tr.clickable').forEach(tr => {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => {
+        state.step = +tr.dataset.iter;
+        renderStep();
+        document.querySelector('#steps').scrollIntoView({behavior:'smooth'});
+      });
+    });
+  }
+
+  /* =================================================================== *
+   * METRICS
+   * =================================================================== */
+  function collectBranches(node, out = []){
+    if(hasKids(node)){
+      node.children.forEach(ch => { out.push(ch); collectBranches(ch, out); });
+    }
+    return out;
+  }
+
+  function rootToLeafDistance(node, target){
+    if(isLeaf(node)) return node.members[0] === target ? node.height : -1;
+    for(const ch of node.children){
+      const p = rootToLeafDistance(ch, target);
+      if(p >= 0) return (node.height - ch.height) + p;
+    }
+    return -1;
+  }
+
+  function renderMetrics(){
+    const a = state.analysis;
+
+    if(!a){
+      $('metricCards').innerHTML = '';
+      renderCharts();
+      renderMergeTable();
+      return;
+    }
+
+    const ds = [];
+    for(let i = 0; i < a.base.m.length; i++){
+      for(let j = i + 1; j < a.base.m.length; j++) ds.push(a.base.m[i][j]);
+    }
+
+    const totalBranches = collectBranches(a.root).reduce((s, b) => s + (b.branchLength || 0), 0);
+    const maxRootLeaf = Math.max(...a.seqs.map(s => rootToLeafDistance(a.root, s.name)));
+    const mean = ds.length ? ds.reduce((x, y) => x + y, 0) / ds.length : 0;
+
+    const cards = [
+      ['Number of sequences', a.seqs.length, 'Leaves'],
+      ['Sequence length', a.seqs[0].seq.length + ' bp', 'Aligned length'],
+      ['Pairwise comparisons', ds.length, 'n(n−1)/2'],
+      ['UPGMA iterations', a.iterations, 'n−1 merges'],
+      ['Minimum distance', fmt(Math.min(...ds)), 'Initial matrix'],
+      ['Maximum distance', fmt(Math.max(...ds)), 'Initial matrix'],
+      ['Mean distance', fmt(mean), 'Initial matrix'],
+      ['Root height', fmt(a.root.height), 'Final node height'],
+      ['Internal nodes', a.iterations, 'One per merge'],
+      ['Total branch length', fmt(totalBranches), 'Sum of all branches'],
+      ['Max root-to-leaf', fmt(maxRootLeaf), 'Ultrametric check'],
+      ['Tree leaves', a.seqs.length, 'Input sequences']
+    ];
+
+    $('metricCards').innerHTML = cards.map(c =>
+      '<div class="metric">' +
+        '<span class="k">' + esc(c[0]) + '</span>' +
+        '<div class="v">' + esc(c[1]) + '</div>' +
+        '<div class="ex">' + esc(c[2]) + '</div>' +
+      '</div>'
+    ).join('');
+
+    renderCharts();
+    renderMergeTable();
+  }
+
+  function renderCharts(){
+    const a = state.analysis;
+    if(!a){
+      ['mergeChart', 'heightChart', 'sizeChart'].forEach(id => {
+        $(id).innerHTML = '<div class="empty">Run an analysis first.</div>';
+      });
+      return;
+    }
+    drawLineChart('mergeChart', a.mergeHistory.map(m => m.distance), 'Merge distance', '#1d4ed8');
+    drawLineChart('heightChart', a.mergeHistory.map(m => m.height), 'Node height', '#7c3aed');
+    drawLineChart('sizeChart', a.mergeHistory.map(m => m.size), 'Cluster size', '#047857');
+  }
+
+  /* ---------------------------------------------------------------- *
+   * FIXED CHART FUNCTION — Y-axis title no longer overlaps tick values
+   * ---------------------------------------------------------------- */
+  function drawLineChart(id, vals, label, color){
+    const box = $(id);
+    if(!vals.length){
+      box.innerHTML = '<div class="empty">No data.</div>';
+      return;
+    }
+
+    const w = Math.max(560, box.clientWidth || 560);
+    const h = 260;
+    /* Increased left padding from 60 → 96 so tick labels + rotated title fit */
+    const p = {l: 96, r: 24, t: 24, b: 44};
+    const innerW = w - p.l - p.r;
+    const innerH = h - p.t - p.b;
+    const max = Math.max(...vals, 0);
+    const min = Math.min(0, ...vals);
+    const span = (max - min) || 1;
+    const gid = 'g-' + id;
+
+    const x = i => p.l + (vals.length === 1 ? innerW / 2 : (i / (vals.length - 1)) * innerW);
+    const y = v => p.t + innerH - ((v - min) / span) * innerH;
+
+    /* Horizontal gridlines + Y tick labels ending 14px left of the plot area */
+    let grid = '';
+    for(let i = 0; i < 5; i++){
+      const gy = p.t + (i * innerH) / 4;
+      const val = max - ((max - min) * i) / 4;
+      grid += '<line x1="' + p.l + '" y1="' + gy + '" x2="' + (w - p.r) + '" y2="' + gy + '" stroke="#eef2f7"/>' +
+              '<text x="' + (p.l - 14) + '" y="' + (gy + 4) + '" text-anchor="end" ' +
+              'font-size="11" fill="#64748b" font-variant-numeric="tabular-nums">' + fmt(val) + '</text>';
+    }
+
+    const pts = vals.map((v, i) => x(i) + ',' + y(v)).join(' ');
+    const areaPts = p.l + ',' + (p.t + innerH) + ' ' + pts + ' ' + x(vals.length - 1) + ',' + (p.t + innerH);
+    const dots = vals.map((v, i) =>
+      '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="#fff" stroke="' + color + '" stroke-width="2">' +
+      '<title>Iteration ' + (i + 1) + ': ' + fmt(v) + '</title></circle>'
+    ).join('');
+    const xlab = vals.map((v, i) =>
+      '<text x="' + x(i) + '" y="' + (h - 14) + '" text-anchor="middle" ' +
+      'font-size="11" fill="#64748b">' + (i + 1) + '</text>'
+    ).join('');
+
+    box.innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(label) + ' chart">' +
+        '<defs>' +
+          '<linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.16"/>' +
+            '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>' +
+          '</linearGradient>' +
+        '</defs>' +
+        grid +
+        '<polygon fill="url(#' + gid + ')" points="' + areaPts + '"/>' +
+        '<polyline fill="none" stroke="' + color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="' + pts + '"/>' +
+        dots + xlab +
+        /* X-axis title */
+        '<text x="' + (p.l + innerW / 2) + '" y="' + (h - 1) + '" text-anchor="middle" ' +
+        'font-size="11" fill="#64748b">Iteration</text>' +
+        /* Y-axis title — moved to x=20, safely left of tick labels */
+        '<text x="20" y="' + (p.t + innerH / 2) + '" ' +
+        'transform="rotate(-90 20 ' + (p.t + innerH / 2) + ')" ' +
+        'text-anchor="middle" font-size="11" fill="#64748b" ' +
+        'font-weight="600">' + esc(label) + '</text>' +
+      '</svg>';
+  }
+
+  /* =================================================================== *
+   * TREE HELPERS
+   * =================================================================== */
+  function makeLeaf(name){
+    return {id: name, members: [name], size: 1, height: 0, children: []};
+  }
+
+  function getVisibleForest(step){
+    const a = state.analysis;
+    if(!a) return [];
+    if(step >= a.iterations) return [a.root];
+
+    let nodes = a.seqs.map(s => makeLeaf(s.name));
+
+    for(let i = 0; i < step; i++){
+      const m = a.mergeHistory[i];
+      const l = nodes.find(n => n.id === m.left);
+      const r = nodes.find(n => n.id === m.right);
+      if(!l || !r) break;
+      nodes = nodes.filter(n => n !== l && n !== r);
+      nodes.push({
+        id: m.newCluster,
+        members: [...l.members, ...r.members],
+        size: l.size + r.size,
+        height: m.height,
+        children: [
+          {...l, branchLength: m.leftBranch},
+          {...r, branchLength: m.rightBranch}
+        ]
+      });
+    }
+    return nodes;
+  }
+
+  function countLeaves(node){
+    if(isLeaf(node)) return 1;
+    return node.children.reduce((s, c) => s + countLeaves(c), 0);
+  }
+
+  function leafColorFor(name){
+    const a = state.analysis;
+    if(!a) return '#64748b';
+    return a.seqColor.get(name) || '#64748b';
+  }
+
+  function nodeColor(node){
+    if(isLeaf(node)) return leafColorFor(node.members[0]);
+    return leafColorFor(node.members[0]);
+  }
+
+  /* =================================================================== *
+   * TREE RENDER
+   * =================================================================== */
+  function drawTree(){
+    const a = state.analysis;
+    const stage = $('treeStage');
+
+    if(!a){
+      stage.innerHTML = '<div class="tree-empty">Run an analysis to generate the tree.</div>';
+      $('treeStepInfo').textContent = 'Iteration 0';
+      return;
+    }
+
+    const visible = clamp(state.treeStep, 0, a.iterations);
+    state.treeStep = visible;
+
+    const roots = getVisibleForest(visible);
+    $('treeStepInfo').textContent = 'Iteration ' + visible + ' / ' + a.iterations;
+
+    const WIDTH = 1040;
+    const rowH = 42;
+    const topPad = 74;
+    const botPad = 58;
+    const leftPad = 110;
+    const rightPad = 240;
+
+    const leafCount = roots.reduce((s, r) => s + countLeaves(r), 0);
+    const height = Math.max(560, topPad + botPad + leafCount * rowH);
+
+    const refHeight = a.root.height > 0 ? a.root.height : 1;
+    const plotW = WIDTH - leftPad - rightPad;
+    const xFor = h => leftPad + (clamp(h, 0, refHeight) / refHeight) * plotW;
+
+    const positions = new Map();
+    let cursor = 0;
+
+    function assignLeaves(n){
+      if(isLeaf(n)){
+        positions.set(n, {x: xFor(0), y: topPad + (cursor++) * rowH});
+        return;
+      }
+      n.children.forEach(child => assignLeaves(child));
+    }
+
+    function layoutInternal(n){
+      if(isLeaf(n)) return positions.get(n);
+      const childPos = n.children.map(child => layoutInternal(child));
+      const y = childPos.reduce((s, cp) => s + cp.y, 0) / childPos.length;
+      const p = {x: xFor(n.height), y};
+      positions.set(n, p);
+      return p;
+    }
+
+    roots.forEach(root => assignLeaves(root));
+    roots.forEach(root => layoutInternal(root));
+
+    const allNodes = [];
+    const parentOf = new Map();
+    const indexOf = new Map();
+
+    function walk(n, parent){
+      indexOf.set(n, allNodes.length);
+      allNodes.push(n);
+      parentOf.set(n, parent);
+      if(hasKids(n)) n.children.forEach(c => walk(c, n));
+    }
+    roots.forEach(root => walk(root, null));
+
+    let svg = '<svg viewBox="0 0 ' + WIDTH + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" ' +
+              'role="img" aria-label="UPGMA phylogenetic tree">';
+
+    for(let i = 0; i <= 4; i++){
+      const gx = leftPad + (i / 4) * plotW;
+      const hh = (refHeight * i / 4).toFixed(4);
+      svg += '<line x1="' + gx + '" y1="' + (topPad - 16) + '" x2="' + gx + '" y2="' + (height - botPad + 6) + '" ' +
+             'stroke="#eef2f7" stroke-width="1" stroke-dasharray="2 6"/>';
+      svg += '<text x="' + gx + '" y="' + (topPad - 26) + '" text-anchor="middle" font-size="10" fill="#94a3b8" ' +
+             'font-family="JetBrains Mono, monospace">h=' + hh + '</text>';
+    }
+
+    svg += '<text x="20" y="26" font-size="12" font-weight="600" fill="#334155" font-family="Inter, sans-serif">UPGMA Tree</text>';
+
+    function renderNode(n){
+      const p = positions.get(n);
+      if(!p) return;
+
+      if(hasKids(n)){
+        const sortedKids = n.children.slice().sort((x, y) => positions.get(x).y - positions.get(y).y);
+
+        sortedKids.forEach(ch => {
+          const cp = positions.get(ch);
+          if(!cp) return;
+          const cx = xFor(ch.height);
+          const bl = (typeof ch.branchLength === 'number') ? fmt(ch.branchLength) : 'n/a';
+          const childLabel = isLeaf(ch) ? ch.members[0] : ch.id;
+          const col = nodeColor(ch);
+
+          svg += '<line class="branch" data-branch="' + indexOf.get(ch) + '" ' +
+                 'x1="' + cx + '" y1="' + cp.y + '" x2="' + p.x + '" y2="' + cp.y + '" ' +
+                 'stroke="' + col + '" opacity="0.85">' +
+                 '<title>Branch to ' + esc(childLabel) + ' — length ' + bl + '</title></line>';
+
+          svg += '<line class="branch" data-branch="' + indexOf.get(ch) + '" ' +
+                 'x1="' + p.x + '" y1="' + cp.y + '" x2="' + p.x + '" y2="' + p.y + '" ' +
+                 'stroke="' + col + '" opacity="0.85">' +
+                 '<title>Connector at ' + esc(n.id) + '</title></line>';
+
+          renderNode(ch);
+        });
+
+        svg += '<circle class="node-dot" data-node="' + indexOf.get(n) + '" ' +
+               'cx="' + p.x + '" cy="' + p.y + '" r="5.5" stroke="' + nodeColor(n) + '">' +
+               '<title>Cluster ' + esc(n.id) + ' — height ' + fmt(n.height) + '</title></circle>';
+
+        svg += '<text class="internal-label" x="' + (p.x + 10) + '" y="' + (p.y - 8) + '">' +
+               esc(n.id) + ' · ' + fmt(n.height) + '</text>';
+      } else {
+        const col = leafColorFor(n.members[0]);
+        svg += '<line x1="' + p.x + '" y1="' + p.y + '" x2="' + (p.x + 26) + '" y2="' + p.y + '" ' +
+               'stroke="' + col + '" stroke-width="2" stroke-linecap="round"/>';
+        svg += '<circle cx="' + (p.x + 30) + '" cy="' + p.y + '" r="5" fill="' + col + '" ' +
+               'stroke="#fff" stroke-width="1.5" style="cursor:pointer"/>';
+        svg += '<text class="leaf-text" data-leaf="' + indexOf.get(n) + '" ' +
+               'x="' + (p.x + 44) + '" y="' + (p.y + 5) + '" fill="' + col + '">' +
+               esc(n.members[0]) + '</text>';
+      }
+    }
+
+    roots.forEach(root => renderNode(root));
+    svg += '</svg>';
+    stage.innerHTML = svg;
+
+    stage.querySelectorAll('[data-leaf]').forEach(el => {
+      el.addEventListener('click', () => showLeaf(allNodes[+el.dataset.leaf]));
+    });
+    stage.querySelectorAll('[data-node]').forEach(el => {
+      el.addEventListener('click', () => {
+        const n = allNodes[+el.dataset.node];
+        showNode(n);
+      });
+    });
+    stage.querySelectorAll('[data-branch]').forEach(el => {
+      el.addEventListener('click', () => {
+        const n = allNodes[+el.dataset.branch];
+        showBranch(n, parentOf.get(n));
+      });
+    });
+  }
+
+  /* =================================================================== *
+   * TREE INFO
+   * =================================================================== */
+  function nodeLabel(n){
+    return isLeaf(n) ? n.members[0] : n.id;
+  }
+
+  function showLeaf(node){
+    const name = node.members[0];
+    const s = state.analysis.seqs.find(x => x.name === name);
+    const col = leafColorFor(name);
+    if(!s){
+      $('treeInfo').innerHTML = '<strong>Sequence: ' + esc(name) + '</strong>';
+      return;
+    }
+    $('treeInfo').innerHTML =
+      '<strong style="color:' + col + '">Sequence: ' + esc(name) + '</strong>' +
+      '<div style="margin-top:6px;font-size:13px">Length: <b>' + s.seq.length + ' bp</b> · Height: <b>0</b></div>' +
+      '<div style="margin-top:10px;font-family:\'JetBrains Mono\',monospace;font-size:12px;background:#fff;padding:10px 12px;border-radius:8px;border:1px solid var(--line);word-break:break-all;color:var(--ink-3)">' +
+      esc(s.seq) + '</div>';
+  }
+
+  function showNode(node){
+    if(isLeaf(node)){ showLeaf(node); return; }
+
+    const a = state.analysis;
+    const m = a.mergeHistory.find(x => x.newCluster === node.id);
+    const col = nodeColor(node);
+
+    if(!m){
+      $('treeInfo').innerHTML =
+        '<strong style="color:' + col + '">Working cluster: ' + esc(node.id) + '</strong><br>' +
+        'Members: ' + esc(node.members.join(', ')) + '<br>' +
+        'Size: <b>' + node.size + '</b><br>' +
+        'Height: <b>' + fmt(node.height) + '</b><br>' +
+        '<span class="small">Shown at the current animation step.</span>';
+      return;
+    }
+
+    $('treeInfo').innerHTML =
+      '<strong style="color:' + col + '">Cluster: ' + esc(node.id) + '</strong>' +
+      '<div style="margin-top:8px;font-size:13px;line-height:1.8">' +
+        'Formed at iteration: <b>' + m.iteration + '</b><br>' +
+        'Members: <b>' + esc(m.members.join(', ')) + '</b><br>' +
+        'Merge distance: <b>' + fmt(m.distance) + '</b><br>' +
+        'Node height: <b>' + fmt(m.height) + '</b><br>' +
+        'Cluster size: <b>' + m.size + '</b><br>' +
+        'Branch to ' + esc(m.left) + ': <b>' + fmt(m.leftBranch) + '</b><br>' +
+        'Branch to ' + esc(m.right) + ': <b>' + fmt(m.rightBranch) + '</b>' +
+      '</div>';
+  }
+
+  function showBranch(child, parent){
+    const bl = (typeof child.branchLength === 'number') ? fmt(child.branchLength) : 'n/a';
+    const childName = nodeLabel(child);
+    const parentName = parent ? nodeLabel(parent) : '—';
+    const col = nodeColor(child);
+
+    let extra = '';
+    if(hasKids(child)){
+      const m = state.analysis.mergeHistory.find(x => x.newCluster === child.id);
+      if(m){
+        extra = '<div style="margin-top:6px">Merge distance: <b>' + fmt(m.distance) +
+                '</b> · Node height: <b>' + fmt(m.height) + '</b></div>';
+      }
+    } else {
+      extra = '<div style="margin-top:6px">Leaf height: <b>0</b></div>';
+    }
+
+    $('treeInfo').innerHTML =
+      '<strong style="color:' + col + '">Branch</strong>' +
+      '<div style="margin-top:8px;font-size:13px;line-height:1.8">' +
+        'Parent: <b>' + esc(parentName) + '</b><br>' +
+        'Child: <b>' + esc(childName) + '</b><br>' +
+        'Branch length: <b>' + bl + '</b>' +
+      '</div>' +
+      '<span class="small">Branch length = parent height − child height.</span>' +
+      extra;
+  }
+
+  /* =================================================================== *
+   * NEWICK
+   * =================================================================== */
+  function newickNode(n){
+    if(isLeaf(n)) return n.members[0];
+    return '(' + n.children.map(ch =>
+      newickNode(ch) + (typeof ch.branchLength === 'number' ? ':' + fmt(ch.branchLength) : '')
+    ).join(',') + ')';
+  }
+  function buildNewick(root){
+    if(!root) return '';
+    return newickNode(root) + ';';
+  }
+
+  /* =================================================================== *
+   * DOWNLOADS
+   * =================================================================== */
+  function downloadBlob(filename, blob){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+  function downloadText(filename, text, mime){
+    downloadBlob(filename, new Blob([text], {type: (mime || 'text/plain') + ';charset=utf-8'}));
+  }
+  function csvEscape(v){
+    const s = String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCSV(filename, rows){
+    downloadText(filename, rows.map(r => r.map(csvEscape).join(',')).join('\n'), 'text/csv');
+  }
+
+  function exportDistanceCSV(){
+    if(!state.analysis) return toast('Run an analysis first');
+    const snap = state.analysis.matrices[0];
+    const rows = [['', ...snap.clusters.map(c => c.id)]];
+    snap.clusters.forEach((c, i) => rows.push([c.id, ...snap.matrix[i].map(v => v.toFixed(4))]));
+    exportCSV('upgma_distance_matrix.csv', rows);
+  }
+  function exportMergeCSV(){
+    if(!state.analysis) return toast('Run an analysis first');
+    const rows = [['Iteration', 'Cluster 1', 'Cluster 2', 'Distance', 'New Cluster', 'Cluster Size', 'Node Height', 'Left Branch', 'Right Branch']];
+    state.analysis.mergeHistory.forEach(m => rows.push([
+      m.iteration, m.left, m.right, m.distance.toFixed(4), m.newCluster,
+      m.size, m.height.toFixed(4), Number(m.leftBranch).toFixed(4), Number(m.rightBranch).toFixed(4)
+    ]));
+    exportCSV('upgma_merge_history.csv', rows);
+  }
+  function exportMetricsCSV(){
+    if(!state.analysis) return toast('Run an analysis first');
+    const a = state.analysis;
+    const ds = [];
+    a.base.m.forEach((row, i) => row.forEach((v, j) => { if(j > i) ds.push(v); }));
+    const total = collectBranches(a.root).reduce((s, b) => s + (b.branchLength || 0), 0);
+    const rows = [
+      ['Metric', 'Value'],
+      ['Number of sequences', a.seqs.length],
+      ['Sequence length', a.seqs[0].seq.length],
+      ['Pairwise comparisons', ds.length],
+      ['UPGMA iterations', a.iterations],
+      ['Minimum distance', Math.min(...ds)],
+      ['Maximum distance', Math.max(...ds)],
+      ['Mean distance', ds.reduce((x, y) => x + y, 0) / ds.length],
+      ['Root height', a.root.height],
+      ['Total branch length', total]
+    ];
+    exportCSV('upgma_metrics.csv', rows);
+  }
+  function exportTXT(){
+    if(!state.analysis) return toast('Run an analysis first');
+    const a = state.analysis;
+    let out = 'UPGMA PHYLOGENETIC TREE & METRICS ANALYZER\n';
+    out += '=========================================\n\n';
+    out += 'Sequences: ' + a.seqs.length + '\n';
+    out += 'Length: ' + a.seqs[0].seq.length + ' bp\n\n';
+    out += 'INITIAL DISTANCE MATRIX\n';
+    const snap = a.matrices[0];
+    out += snap.clusters.map(c => c.id).join('\t') + '\n';
+    snap.clusters.forEach((c, i) => {
+      out += c.id + '\t' + snap.matrix[i].map(v => v.toFixed(4)).join('\t') + '\n';
+    });
+    out += '\nMERGE HISTORY\n';
+    a.mergeHistory.forEach(m => {
+      out += 'Iteration ' + m.iteration + ': ' + m.left + ' + ' + m.right + ' = ' + m.newCluster +
+             '; distance=' + fmt(m.distance) + '; height=' + fmt(m.height) + '; size=' + m.size + '\n';
+    });
+    out += '\nNEWICK\n' + buildNewick(a.root) + '\n';
+    downloadText('upgma_complete_analysis.txt', out);
+  }
+
+  /* =================================================================== *
+   * TREE IMAGE EXPORT
+   * =================================================================== */
+  function serializeTreeSvg(){
+    const svg = $('treeStage').querySelector('svg');
+    if(!svg) return null;
+
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    const vb = svg.viewBox.baseVal;
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('x', 0); bg.setAttribute('y', 0);
+    bg.setAttribute('width', vb.width || 1000);
+    bg.setAttribute('height', vb.height || 600);
+    bg.setAttribute('fill', '#ffffff');
+
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent =
+      'text{font-family:Arial,Helvetica,sans-serif}' +
+      '.branch{stroke-width:2;fill:none;stroke-linecap:round}' +
+      '.node-dot{fill:#fff;stroke-width:2.4}' +
+      '.leaf-text{font-weight:600;font-size:13px}' +
+      '.internal-label{font-size:10.5px;font-weight:600;fill:#64748b}';
+
+    clone.insertBefore(bg, clone.firstChild);
+    clone.insertBefore(style, clone.firstChild);
+    return new XMLSerializer().serializeToString(clone);
+  }
+
+  function exportCurrentTreeSVG(){
+    if(!state.analysis) return toast('Run an analysis first');
+    const xml = serializeTreeSvg();
+    if(!xml) return toast('Generate the tree first');
+    downloadText('upgma_tree.svg', xml, 'image/svg+xml');
+  }
+
+  function exportCurrentTreePNG(){
+    if(!state.analysis) return toast('Run an analysis first');
+    const xml = serializeTreeSvg();
+    if(!xml) return toast('Generate the tree first');
+
+    const svg = $('treeStage').querySelector('svg');
+    const vb = svg.viewBox.baseVal;
+    const scale = 2;
+    const url = URL.createObjectURL(new Blob([xml], {type: 'image/svg+xml;charset=utf-8'}));
+    const img = new Image();
+
+    img.onload = () => {
+      try{
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil((vb.width || 1000) * scale);
+        canvas.height = Math.ceil((vb.height || 600) * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.drawImage(img, 0, 0, vb.width || 1000, vb.height || 600);
+        canvas.toBlob(png => {
+          URL.revokeObjectURL(url);
+          if(png) downloadBlob('upgma_tree.png', png);
+          else toast('PNG export failed; use SVG export instead.');
+        }, 'image/png');
+      } catch(err){
+        URL.revokeObjectURL(url);
+        toast('PNG export failed; use SVG export instead.');
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast('PNG export failed; use SVG export instead.');
+    };
+    img.src = url;
+  }
+
+  /* =================================================================== *
+   * PLAYBACK
+   * =================================================================== */
+  function stopPlayback(){
+    if(state.playing){ clearInterval(state.playing); state.playing = null; }
+    $('playSteps').textContent = 'Play';
+  }
+  function stopAnimation(){
+    if(state.animating){ clearInterval(state.animating); state.animating = null; }
+    $('animateTreeBtn').textContent = 'Animate Construction';
+  }
+
+  /* =================================================================== *
+   * MASTER RENDER
+   * =================================================================== */
+  function renderAll(){
+    renderInitialMatrix();
+    renderStep();
+    renderMetrics();
+    drawTree();
+    $('newickText').textContent = state.analysis ? buildNewick(state.analysis.root) : 'No analysis yet.';
+  }
+
+  /* =================================================================== *
+   * EVENT WIRING
+   * =================================================================== */
+  $('startBtn').addEventListener('click', () => document.querySelector('#input').scrollIntoView({behavior:'smooth'}));
+  $('loadExampleHero').addEventListener('click', () => {
+    populateRows(EXAMPLE);
+    runAnalysis();
+    document.querySelector('#validation').scrollIntoView({behavior:'smooth'});
+  });
+
+  $('addSeqBtn').addEventListener('click', () => addRow({name:'', seq:''}));
+  $('clearBtn').addEventListener('click', () => { if(confirm('Are you sure you want to reset the analysis?')) clearAll(); });
+  $('loadExampleBtn').addEventListener('click', () => {
+    populateRows(EXAMPLE);
+    runAnalysis();
+    document.querySelector('#validation').scrollIntoView({behavior:'smooth'});
+  });
+  $('validateBtn').addEventListener('click', runAnalysis);
+
+  $('parseFastaBtn').addEventListener('click', () => {
+    try{
+      const data = parseFastaText($('fastaInput').value);
+      populateRows(data);
+      validate(data);
+      toast(data.length + ' FASTA sequences parsed');
+    } catch(e){
+      $('validationPanel').innerHTML =
+        '<div class="validation-box error"><div class="check err">' +
+        '<span class="mark">✕</span><span class="msg">' + esc(e.message) + '</span></div></div>';
+    }
+  });
+
+  document.querySelectorAll('[data-input-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-input-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const isFasta = btn.dataset.inputTab === 'fasta';
+      $('rowsTab').style.display = isFasta ? 'none' : '';
+      $('fastaTab').style.display = isFasta ? '' : 'none';
+    });
+  });
+
+  $('prevStep').addEventListener('click', () => { if(!state.analysis) return; state.step = Math.max(0, state.step - 1); renderStep(); });
+  $('nextStep').addEventListener('click', () => { if(!state.analysis) return; state.step = Math.min(state.analysis.iterations, state.step + 1); renderStep(); });
+  $('restartSteps').addEventListener('click', () => { if(!state.analysis) return; state.step = 0; renderStep(); });
+  $('showAllSteps').addEventListener('click', () => { if(!state.analysis) return; state.step = state.analysis.iterations; renderStep(); });
+
+  $('playSteps').addEventListener('click', () => {
+    if(!state.analysis) return;
+    if(state.playing){ stopPlayback(); return; }
+    if(state.step >= state.analysis.iterations) state.step = 0;
+    $('playSteps').textContent = 'Pause';
+    state.playing = setInterval(() => {
+      if(state.step >= state.analysis.iterations){ stopPlayback(); return; }
+      state.step++; renderStep();
+    }, 1200);
+  });
+
+  $('animateTreeBtn').addEventListener('click', () => {
+    if(!state.analysis) return;
+    if(state.animating){ stopAnimation(); return; }
+    state.treeStep = 0; drawTree();
+    $('animateTreeBtn').textContent = 'Pause';
+    state.animating = setInterval(() => {
+      if(state.treeStep >= state.analysis.iterations){ stopAnimation(); return; }
+      state.treeStep++; drawTree();
+    }, 1000);
+  });
+  $('treePauseBtn').addEventListener('click', stopAnimation);
+  $('treeBackBtn').addEventListener('click', () => { if(!state.analysis) return; state.treeStep = Math.max(0, state.treeStep - 1); drawTree(); });
+  $('treeForwardBtn').addEventListener('click', () => { if(!state.analysis) return; state.treeStep = Math.min(state.analysis.iterations, state.treeStep + 1); drawTree(); });
+  $('treeResetBtn').addEventListener('click', () => { if(!state.analysis) return; state.treeStep = 0; drawTree(); });
+
+  $('copyNewickBtn').addEventListener('click', async () => {
+    if(!state.analysis) return toast('Run an analysis first');
+    const text = buildNewick(state.analysis.root);
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+        toast('Newick copied to clipboard');
+      } else throw new Error('clipboard unavailable');
+    } catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); toast('Newick copied to clipboard'); }
+      catch(err){ toast('Copy failed — please copy manually'); }
+      document.body.removeChild(ta);
+    }
+  });
+
+  $('downloadNewickBtn').addEventListener('click', () => {
+    if(!state.analysis) return toast('Run an analysis first');
+    downloadText('upgma_tree.nwk', buildNewick(state.analysis.root) + '\n');
+  });
+
+  $('expDist').addEventListener('click', exportDistanceCSV);
+  $('expMerge').addEventListener('click', exportMergeCSV);
+  $('expMetric').addEventListener('click', exportMetricsCSV);
+  $('expTxt').addEventListener('click', exportTXT);
+
+  $('downloadSvgBtn').addEventListener('click', exportCurrentTreeSVG);
+  $('downloadPngBtn').addEventListener('click', exportCurrentTreePNG);
+
+  $('modalClose').addEventListener('click', () => { $('modalBackdrop').style.display = 'none'; });
+
+  window.addEventListener('resize', () => { if(state.analysis) renderCharts(); });
+
+  /* =================================================================== *
+   * BOOT
+   * =================================================================== */
+  populateRows(EXAMPLE.slice(0, 4));
+  renderAll();
+})();
+</script>
+</body>
+</html>
